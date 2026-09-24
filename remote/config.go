@@ -1,14 +1,13 @@
 package remote
 
 import (
-	"context"
 	"net/http"
 	"time"
 
-	toolsdk "github.com/domainry/domainry-tools-sdk"
+	"github.com/domainry/domainry-todo-sdk/saashost"
 )
 
-type SourceAuthorizer func(context.Context, string, toolsdk.Authority) error
+type SourceAuthorizer = saashost.SourceAuthorizer
 type Config struct {
 	Endpoint           string
 	ServiceAccessToken string

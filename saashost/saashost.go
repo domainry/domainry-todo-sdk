@@ -8,15 +8,19 @@ import (
 
 	lifecyclecontract "github.com/domainry/domainry-lifecycle-sdk/contract"
 	todocontract "github.com/domainry/domainry-todo-sdk/contract"
+	toolsdk "github.com/domainry/domainry-tools-sdk"
 )
 
 const RuntimeIDHeader = "X-Domainry-Runtime-ID"
+
+type SourceAuthorizer func(context.Context, string, toolsdk.Authority) error
 
 type Binding interface {
 	Descriptor() todocontract.Descriptor
 	Todos() todocontract.TodoService
 	Mutations() todocontract.MutationService
 	SubjectLifecycle() lifecyclecontract.SubjectExecutionHandler
+	BindSourceAuthorizer(SourceAuthorizer) error
 	Close(context.Context) error
 }
 

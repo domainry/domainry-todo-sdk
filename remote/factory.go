@@ -4,6 +4,7 @@ package remote
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	lifecyclecontract "github.com/domainry/domainry-lifecycle-sdk/contract"
@@ -47,6 +48,16 @@ func (v *binding) Todos() todocontract.TodoService         { return todoService{
 func (v *binding) Mutations() todocontract.MutationService { return mutationService{v.client} }
 func (v *binding) SubjectLifecycle() lifecyclecontract.SubjectExecutionHandler {
 	return subjectLifecycle{v.client}
+}
+func (v *binding) BindSourceAuthorizer(authorizer saashost.SourceAuthorizer) error {
+	if authorizer == nil {
+		return fmt.Errorf("Todo SaaS source authorizer is required")
+	}
+	if v.client.authorizeSource != nil {
+		return fmt.Errorf("Todo SaaS source authorizer is already bound")
+	}
+	v.client.authorizeSource = authorizer
+	return nil
 }
 func (*binding) Close(context.Context) error { return nil }
 
