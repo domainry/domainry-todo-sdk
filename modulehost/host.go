@@ -45,9 +45,8 @@ type SourceAuthorizer interface {
 }
 
 type TransactionalMutator interface {
-	ApplyMutation(context.Context, todocontract.Mutation, toolsdk.Authority) (todocontract.MutationResult, error)
+	todocontract.MutationService
 	ApplyInTransaction(context.Context, *sql.Tx, todocontract.Mutation, toolsdk.Authority) (todocontract.MutationResult, error)
-	MutationReceipt(context.Context, todocontract.Mutation, toolsdk.Authority) (todocontract.MutationResult, bool, error)
 }
 
 type ModuleBinding interface {
