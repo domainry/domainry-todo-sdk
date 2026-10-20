@@ -6,7 +6,7 @@ require (
 	github.com/domainry/domainry-foundation v0.2.9
 	github.com/domainry/domainry-lifecycle-sdk v0.1.25
 	github.com/domainry/domainry-orm v0.1.33
-	github.com/domainry/domainry-tools-sdk v0.1.19
+	github.com/domainry/domainry-tools-sdk v0.1.20
 )
 
 require (
@@ -14,7 +14,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/domainry/domainry-identity-sdk v0.1.27 // indirect
 	github.com/domainry/domainry-integration-sdk v0.1.19 // indirect
-	github.com/domainry/domainry-report-sdk v0.1.21 // indirect
+	github.com/domainry/domainry-report-sdk v0.1.22 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
