@@ -81,9 +81,12 @@ func (c *client) request(ctx context.Context, method, path string, input, output
 		return remoteError("unavailable", "todo.response_too_large", false, nil)
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		var payload todocontract.SaaSResponse
-		if json.Unmarshal(raw, &payload) == nil && payload.Error != nil {
-			return codedError(payload.Error)
+		var payload struct {
+			Code    string `json:"code"`
+			Message string `json:"message"`
+		}
+		if json.Unmarshal(raw, &payload) == nil && strings.TrimSpace(payload.Code) != "" {
+			return &toolsdk.Error{Class: statusClass(response.StatusCode), Code: safeCode(payload.Code), Message: safeMessage(payload.Message), Retryable: response.StatusCode >= 500}
 		}
 		return remoteError(statusClass(response.StatusCode), "todo.remote_request_failed", response.StatusCode >= 500, nil)
 	}
