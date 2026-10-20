@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/domainry/domainry-foundation/telemetry"
 	todocontract "github.com/domainry/domainry-todo-sdk/contract"
 	"github.com/domainry/domainry-todo-sdk/saashost"
 	toolsdk "github.com/domainry/domainry-tools-sdk"
@@ -34,7 +35,7 @@ func newClient(config Config, runtimeID string) (*client, error) {
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: config.RequestTimeout, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
 	}
-	return &client{base: base, runtimeID: runtimeID, token: strings.TrimSpace(config.ServiceAccessToken), http: httpClient, requestLimit: config.MaxRequestBytes, responseLimit: config.MaxResponseBytes, authorizeSource: config.AuthorizeSource}, nil
+	return &client{base: base, runtimeID: runtimeID, token: strings.TrimSpace(config.ServiceAccessToken), http: telemetry.InstrumentHTTPClient(httpClient, "github.com/domainry/domainry-todo-sdk/remote"), requestLimit: config.MaxRequestBytes, responseLimit: config.MaxResponseBytes, authorizeSource: config.AuthorizeSource}, nil
 }
 func (c *client) request(ctx context.Context, method, path string, input, output any) error {
 	if ctx == nil {
@@ -53,6 +54,7 @@ func (c *client) request(ctx context.Context, method, path string, input, output
 	}
 	endpoint := *c.base
 	endpoint.Path = strings.TrimRight(c.base.Path, "/") + "/" + strings.TrimLeft(path, "/")
+	ctx = telemetry.WithHTTPClientOperation(ctx, "todo.remote")
 	request, err := http.NewRequestWithContext(ctx, method, endpoint.String(), body)
 	if err != nil {
 		return remoteError("unavailable", "todo.request_invalid", false, err)
