@@ -86,7 +86,7 @@ func (c *client) request(ctx context.Context, method, path string, input, output
 			Message string `json:"message"`
 		}
 		if json.Unmarshal(raw, &payload) == nil && strings.TrimSpace(payload.Code) != "" {
-			return &toolsdk.Error{Class: statusClass(response.StatusCode), Code: safeCode(payload.Code), Message: safeMessage(payload.Message), Retryable: response.StatusCode >= 500}
+			return &toolsdk.Error{Class: statusClass(response.StatusCode), Code: safeCode(payload.Code), Message: safeMessage(payload.Message), Retryable: response.StatusCode == http.StatusTooManyRequests || response.StatusCode >= 500}
 		}
 		return remoteError(statusClass(response.StatusCode), "todo.remote_request_failed", response.StatusCode >= 500, nil)
 	}
@@ -146,15 +146,27 @@ func (c *client) invoke(ctx context.Context, operation string, input, output any
 func codedError(value *todocontract.SaaSError) error {
 	return &toolsdk.Error{Class: safeClass(value.Class), Code: safeCode(value.Code), Message: safeMessage(value.Message), Retryable: value.Retryable}
 }
-func remoteError(class, code string, retryable bool, cause error) error {
+func remoteError(class toolsdk.ErrorClass, code string, retryable bool, cause error) error {
 	return &toolsdk.Error{Class: class, Code: code, Retryable: retryable, Cause: cause}
 }
-func safeClass(v string) string {
+func safeClass(v string) toolsdk.ErrorClass {
 	switch strings.TrimSpace(v) {
-	case "bad_request", "forbidden", "not_found", "conflict", "unavailable":
-		return strings.TrimSpace(v)
+	case string(toolsdk.ErrorClassBadRequest):
+		return toolsdk.ErrorClassBadRequest
+	case string(toolsdk.ErrorClassForbidden):
+		return toolsdk.ErrorClassForbidden
+	case string(toolsdk.ErrorClassNotFound):
+		return toolsdk.ErrorClassNotFound
+	case string(toolsdk.ErrorClassConflict):
+		return toolsdk.ErrorClassConflict
+	case string(toolsdk.ErrorClassRateLimited):
+		return toolsdk.ErrorClassRateLimited
+	case string(toolsdk.ErrorClassUnavailable):
+		return toolsdk.ErrorClassUnavailable
+	case string(toolsdk.ErrorClassInternal):
+		return toolsdk.ErrorClassInternal
 	default:
-		return "unavailable"
+		return toolsdk.ErrorClassInternal
 	}
 }
 func safeCode(v string) string {
@@ -176,17 +188,21 @@ func safeMessage(v string) string {
 	}
 	return v
 }
-func statusClass(status int) string {
+func statusClass(status int) toolsdk.ErrorClass {
 	switch status {
 	case http.StatusBadRequest, http.StatusRequestEntityTooLarge:
-		return "bad_request"
+		return toolsdk.ErrorClassBadRequest
 	case http.StatusUnauthorized, http.StatusForbidden:
-		return "forbidden"
+		return toolsdk.ErrorClassForbidden
 	case http.StatusNotFound:
-		return "not_found"
+		return toolsdk.ErrorClassNotFound
 	case http.StatusConflict:
-		return "conflict"
+		return toolsdk.ErrorClassConflict
+	case http.StatusTooManyRequests:
+		return toolsdk.ErrorClassRateLimited
+	case http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+		return toolsdk.ErrorClassUnavailable
 	default:
-		return "unavailable"
+		return toolsdk.ErrorClassInternal
 	}
 }
