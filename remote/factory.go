@@ -71,12 +71,12 @@ func (v todoService) Todos(c context.Context, i todocontract.TodoQuery, a toolsd
 	}{i, a}, &o)
 	return o, e
 }
-func (v todoService) Todo(c context.Context, id string, a toolsdk.Authority) (todocontract.Todo, error) {
+func (v todoService) Todo(c context.Context, todoID string, a toolsdk.Authority) (todocontract.Todo, error) {
 	var o todocontract.Todo
 	e := v.client.invoke(c, "todos.get", struct {
-		ID        string            `json:"id"`
+		TodoID    string            `json:"todo_id"`
 		Authority toolsdk.Authority `json:"authority"`
-	}{id, a}, &o)
+	}{todoID, a}, &o)
 	return o, e
 }
 func (v todoService) CreateTodos(c context.Context, i todocontract.TodoCreate, a toolsdk.Authority) (todocontract.TodoBatch, error) {
@@ -87,21 +87,21 @@ func (v todoService) CreateTodos(c context.Context, i todocontract.TodoCreate, a
 	}{i, a}, &o)
 	return o, e
 }
-func (v todoService) UpdateTodo(c context.Context, id string, i todocontract.TodoUpdate, a toolsdk.Authority) (todocontract.Todo, error) {
+func (v todoService) UpdateTodo(c context.Context, todoID string, i todocontract.TodoUpdate, a toolsdk.Authority) (todocontract.Todo, error) {
 	var o todocontract.Todo
 	e := v.client.invoke(c, "todos.update", struct {
-		ID        string                  `json:"id"`
+		TodoID    string                  `json:"todo_id"`
 		Input     todocontract.TodoUpdate `json:"input"`
 		Authority toolsdk.Authority       `json:"authority"`
-	}{id, i, a}, &o)
+	}{todoID, i, a}, &o)
 	return o, e
 }
-func (v todoService) DeleteTodo(c context.Context, id string, i todocontract.TodoDelete, a toolsdk.Authority) error {
+func (v todoService) DeleteTodo(c context.Context, todoID string, i todocontract.TodoDelete, a toolsdk.Authority) error {
 	return v.client.invoke(c, "todos.delete", struct {
-		ID        string                  `json:"id"`
+		TodoID    string                  `json:"todo_id"`
 		Input     todocontract.TodoDelete `json:"input"`
 		Authority toolsdk.Authority       `json:"authority"`
-	}{id, i, a}, nil)
+	}{todoID, i, a}, nil)
 }
 
 type mutationService struct{ client *client }

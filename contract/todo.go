@@ -2,15 +2,17 @@ package contract
 
 import (
 	"context"
-	toolsdk "github.com/domainry/domainry-tools-sdk"
 	"time"
+
+	toolsdk "github.com/domainry/domainry-tools-sdk"
 )
 
 // A personal todo is an owned work item, not an Agent run or scheduled job.
 // BatchID/Position preserve the original order even after another item is
 // completed or deleted. Source references never grant access to that source.
 type Todo struct {
-	ID                   string     `json:"id"`
+	ID                   int64      `json:"id"`
+	TodoID               string     `json:"todo_id"`
 	Title                string     `json:"title"`
 	Description          string     `json:"description,omitempty"`
 	Status               string     `json:"status"`
@@ -78,7 +80,7 @@ type TodoPage struct {
 
 type TodoService interface {
 	Todos(context.Context, TodoQuery, toolsdk.Authority) (TodoPage, error)
-	Todo(context.Context, string, toolsdk.Authority) (Todo, error)
+	Todo(context.Context, string, toolsdk.Authority) (Todo, error) // business todo_id
 	CreateTodos(context.Context, TodoCreate, toolsdk.Authority) (TodoBatch, error)
 	UpdateTodo(context.Context, string, TodoUpdate, toolsdk.Authority) (Todo, error)
 	DeleteTodo(context.Context, string, TodoDelete, toolsdk.Authority) error
